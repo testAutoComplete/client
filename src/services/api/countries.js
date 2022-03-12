@@ -3,17 +3,20 @@ export async function makeRequest(path, value) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "true",
     },
     body: JSON.stringify({ value }),
   };
-  const response = await fetch(
-    `http://localhost:5000/countries/${path}`,
-    requestOptions
-  );
-  const data = await response.json();
+  try {
+    const response = await fetch(
+      `http://localhost:5000/countries/${path}`,
+      requestOptions
+    );
+    const data = await response.json();
 
-  return data;
+    return data;
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 export async function getSuggestions(value) {

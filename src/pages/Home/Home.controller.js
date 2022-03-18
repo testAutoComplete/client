@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useCallback } from "react";
 import Home from "./Home";
 import { getSuggestions, getCountry } from "../../services/api/countries";
-import AwesomeDebouncePromise from "awesome-debounce-promise";
 
-const searchAPIDebounced = AwesomeDebouncePromise(getSuggestions, 300, {
-  key: (text) => text,
-});
+const debounce = (func) => {
+  let timer;
+  return function (...args) {
+    const context = this;
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      func.apply(context, args);
+    }, 100);
+  };
+};
 
 const HomeController = () => {
   const [searchValue, setSearchValue] = React.useState("");
@@ -13,18 +20,13 @@ const HomeController = () => {
   const [selectedCountry, setSelectedCountry] = React.useState(null);
   const [openSuggestionsBox, setOpenSuggestionsBox] = React.useState(false);
 
-  const handleSearchFiledChange = async (e) => {
-    setSearchValue(e.target.value);
+  const handleChange = async (value) => {
+    setSearchValue(value);
+    const _suggestions = await getSuggestions(value);
 
-    if (e.target.value.length > 0) {
-      e.stopPropagation();
-      const _suggestions = await searchAPIDebounced(e.target.value);
+    if (_suggestions.length > 0) {
       setSuggestions(_suggestions);
-      if (_suggestions.length > 0) {
-        setOpenSuggestionsBox(true);
-      } else {
-        setOpenSuggestionsBox(false);
-      }
+      setOpenSuggestionsBox(true);
     } else {
       setOpenSuggestionsBox(false);
     }
@@ -36,13 +38,15 @@ const HomeController = () => {
     setSearchValue(countryData.name);
   };
 
+  const optimizedFn = useCallback(debounce(handleChange), []);
+
   return (
     <Home
       selectedCountry={selectedCountry}
       handleItemClick={handleItemClick}
       openSuggestionsBox={openSuggestionsBox}
       suggestions={suggestions}
-      handleSearchFiledChange={handleSearchFiledChange}
+      handleSearchFieldChange={optimizedFn}
       searchValue={searchValue}
       setOpenSuggestionsBox={setOpenSuggestionsBox}
     />

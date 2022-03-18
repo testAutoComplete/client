@@ -35,7 +35,10 @@ export default function Home(props) {
               <div className={classes.menuWrapper}>
                 <TextField
                   value={props.searchValue}
-                  onChange={props.handleSearchFiledChange}
+                  onChange={(e) => {
+                    props.handleSearchFieldChange(e.target.value);
+                    e.stopPropagation();
+                  }}
                   type="text"
                   autoComplete="off"
                   margin="normal"

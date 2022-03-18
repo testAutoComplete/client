@@ -3,6 +3,10 @@ import Home from "./Home";
 import { getSuggestions, getCountry } from "../../services/api/countries";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 
+const searchAPIDebounced = AwesomeDebouncePromise(getSuggestions, 300, {
+  key: (text) => text,
+});
+
 const HomeController = () => {
   const [searchValue, setSearchValue] = React.useState("");
   const [suggestions, setSuggestions] = React.useState([]);
@@ -14,10 +18,12 @@ const HomeController = () => {
 
     if (e.target.value.length > 0) {
       e.stopPropagation();
-      const _suggestions = await getSuggestions(e.target.value);
+      const _suggestions = await searchAPIDebounced(e.target.value);
       setSuggestions(_suggestions);
       if (_suggestions.length > 0) {
         setOpenSuggestionsBox(true);
+      } else {
+        setOpenSuggestionsBox(false);
       }
     } else {
       setOpenSuggestionsBox(false);
@@ -27,22 +33,16 @@ const HomeController = () => {
   const handleItemClick = async (value) => {
     const countryData = await getCountry(value);
     setSelectedCountry(countryData);
+    setSearchValue(countryData.name);
   };
 
-  const searchAPIDebounced = AwesomeDebouncePromise(
-    handleSearchFiledChange,
-    300
-  );
-
-  const handleSubmit = async (event) => {};
   return (
     <Home
       selectedCountry={selectedCountry}
       handleItemClick={handleItemClick}
       openSuggestionsBox={openSuggestionsBox}
-      handleSubmit={handleSubmit}
       suggestions={suggestions}
-      handleSearchFiledChange={searchAPIDebounced}
+      handleSearchFiledChange={handleSearchFiledChange}
       searchValue={searchValue}
       setOpenSuggestionsBox={setOpenSuggestionsBox}
     />

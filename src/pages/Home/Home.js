@@ -34,7 +34,7 @@ export default function Home(props) {
             <Box sx={{ mt: 1, marginTop: 0, paddingBottom: 40, width: "100%" }}>
               <div className={classes.menuWrapper}>
                 <TextField
-                  value={props.searchFieldValue}
+                  value={props.searchValue}
                   onChange={props.handleSearchFiledChange}
                   type="text"
                   autoComplete="off"
